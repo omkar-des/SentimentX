@@ -457,7 +457,7 @@ export default function Home() {
                   </div>
 
                   {/* Sentiment or Add */}
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
                     {inList && entry?.overall_score != null ? (
                       <>
                         <div
