@@ -1,0 +1,95 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono);
+  --font-display: var(--font-display);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+  --radius-pill: 999px;
+}
+
+:root {
+  /* Skylearn brand tokens */
+  --sky: #3B82F6;
+  --sky-bright: #60A5FA;
+  --sky-deep: #1D4ED8;
+  --sky-soft: #DBEAFE;
+  --leaf: #22C55E;
+  --leaf-soft: #DCFCE7;
+  --leaf-deep: #16A34A;
+  --coral: #F87171;
+  --coral-soft: #FEE2E2;
+  --sun: #FBBF24;
+  --sun-soft: #FEF3C7;
+  --sun-bright: #FCD34D;
+  --ink: #0F172A;
+  --ink-muted: #475569;
+  --ink-subtle: #94A3B8;
+  --ink-faint: #CBD5E1;
+  --outline: #E2E8F0;
+  --outline-strong: #94A3B8;
+  --surface: #F8FAFC;
+  --surface-sunken: #F1F5F9;
+
+  /* Shadcn token mappings → Skylearn */
+  --background: #FFFFFF;
+  --foreground: #0F172A;
+  --card: #FFFFFF;
+  --card-foreground: #0F172A;
+  --popover: #FFFFFF;
+  --popover-foreground: #0F172A;
+  --primary: #3B82F6;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F8FAFC;
+  --secondary-foreground: #0F172A;
+  --muted: #F8FAFC;
+  --muted-foreground: #475569;
+  --accent: #DBEAFE;
+  --accent-foreground: #1D4ED8;
+  --destructive: #F87171;
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #3B82F6;
+  --radius: 1.25rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body), "Atkinson Hyperlegible", "Nunito Sans", sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  html {
+    font-size: 16px;
+  }
+}
