@@ -1,6 +1,6 @@
 import type { StockPrice } from "@/lib/types"
 
-const BASE = "http://localhost:8000"
+const BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000"
 
 export async function searchStocks(q: string) {
   const res = await fetch(`${BASE}/api/search?q=${encodeURIComponent(q)}`)
