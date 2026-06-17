@@ -3,6 +3,15 @@ export interface StockSuggestion {
   name: string
 }
 
+export interface StockPrice {
+  ticker: string
+  price: number
+  prev_close: number
+  change: number
+  change_pct: number
+  last_updated: number
+}
+
 export interface SentimentResult {
   ticker: string
   name: string

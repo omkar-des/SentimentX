@@ -1,17 +1,20 @@
 "use client"
 
-import { Bookmark, BookmarkCheck, TrendingUp, TrendingDown, Minus, Loader2 } from "lucide-react"
-import type { WatchlistEntry } from "@/lib/types"
+import { BookmarkCheck, TrendingUp, TrendingDown, Minus, Loader2, RefreshCw } from "lucide-react"
+import type { WatchlistEntry, StockPrice } from "@/lib/types"
 import { sentimentColor } from "@/lib/types"
 import { SentimentGauge } from "./SentimentGauge"
 
 interface StockCardProps {
   entry: WatchlistEntry
+  price?: StockPrice | null
+  priceLoading?: boolean
   onSelect: (entry: WatchlistEntry) => void
   onRemove: (ticker: string) => void
+  onRefreshPrice: (ticker: string) => void
 }
 
-export function StockCard({ entry, onSelect, onRemove }: StockCardProps) {
+export function StockCard({ entry, price, priceLoading, onSelect, onRemove, onRefreshPrice }: StockCardProps) {
   const TrendIcon =
     entry.sentiment === "Bullish" ? TrendingUp :
     entry.sentiment === "Bearish" ? TrendingDown : Minus
@@ -95,18 +98,46 @@ export function StockCard({ entry, onSelect, onRemove }: StockCardProps) {
         )}
       </div>
 
-      {/* Sector tag */}
+      {/* Footer: sector + price */}
       <div className="mt-3 pt-3 border-t border-[#E2E8F0]">
-        <span
-          className="text-xs px-2 py-0.5 rounded-full"
-          style={{
-            background: "#F1F5F9",
-            color: "#475569",
-            fontFamily: "var(--font-body)",
-          }}
-        >
-          {entry.sector}
-        </span>
+        <div className="flex items-center justify-between">
+          <span
+            className="text-xs px-2 py-0.5 rounded-full"
+            style={{ background: "#F1F5F9", color: "#475569", fontFamily: "var(--font-body)" }}
+          >
+            {entry.sector}
+          </span>
+          <button
+            onClick={e => { e.stopPropagation(); onRefreshPrice(entry.ticker) }}
+            className="p-1 rounded-lg transition-colors"
+            style={{ color: "#CBD5E1" }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#3B82F6" }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#CBD5E1" }}
+            title="Refresh price"
+          >
+            <RefreshCw size={11} className={priceLoading ? "animate-spin" : ""} />
+          </button>
+        </div>
+
+        <div className="mt-2 flex items-baseline gap-1.5">
+          {priceLoading && !price ? (
+            <span className="text-xs" style={{ color: "#CBD5E1", fontFamily: "var(--font-mono)" }}>
+              Loading…
+            </span>
+          ) : price ? (
+            <>
+              <span className="text-sm font-bold" style={{ color: "#0F172A", fontFamily: "var(--font-mono)" }}>
+                ₹{price.price.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+              <span
+                className="text-xs font-medium"
+                style={{ color: price.change >= 0 ? "#16A34A" : "#DC2626", fontFamily: "var(--font-mono)" }}
+              >
+                {price.change >= 0 ? "▲" : "▼"} {Math.abs(price.change_pct).toFixed(2)}%
+              </span>
+            </>
+          ) : null}
+        </div>
       </div>
     </div>
   )

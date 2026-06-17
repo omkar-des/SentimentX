@@ -7,9 +7,9 @@ import { StockCard } from "@/components/StockCard"
 import { BottomSheet } from "@/components/BottomSheet"
 import { ALL_STOCKS } from "@/lib/stocks"
 import { loadWatchlist, saveToWatchlist, removeFromWatchlist, isInWatchlist } from "@/lib/watchlist"
-import { fetchSentiment } from "@/lib/api"
+import { fetchSentiment, fetchPrice } from "@/lib/api"
 import { getSentiment } from "@/lib/types"
-import type { WatchlistEntry, SentimentResult } from "@/lib/types"
+import type { WatchlistEntry, SentimentResult, StockPrice } from "@/lib/types"
 
 type FilterKey = "All" | "Bullish" | "Bearish" | "Neutral"
 
@@ -28,6 +28,8 @@ export default function Home() {
   const [sheetOpen, setSheetOpen] = useState(false)
   const [activeFilter, setActiveFilter] = useState<FilterKey>("All")
   const [discoverQuery, setDiscoverQuery] = useState("")
+  const [prices, setPrices] = useState<Record<string, StockPrice | null>>({})
+  const [pricesLoading, setPricesLoading] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     const saved = loadWatchlist()
@@ -37,6 +39,13 @@ export default function Home() {
       sentiment: null,
       loading: false,
     })))
+  }, [])
+
+  const refreshPrice = useCallback(async (ticker: string) => {
+    setPricesLoading(prev => ({ ...prev, [ticker]: true }))
+    const price = await fetchPrice(ticker)
+    setPrices(prev => ({ ...prev, [ticker]: price }))
+    setPricesLoading(prev => ({ ...prev, [ticker]: false }))
   }, [])
 
   const loadSentiment = useCallback(async (ticker: string): Promise<SentimentResult | null> => {
@@ -53,6 +62,7 @@ export default function Home() {
             : e
         )
       )
+      refreshPrice(ticker)
       return result
     } catch {
       setWatchlist(prev =>
@@ -60,7 +70,7 @@ export default function Home() {
       )
       return null
     }
-  }, [])
+  }, [refreshPrice])
 
   const handleAdd = useCallback((ticker: string, name: string, sector: string) => {
     const entry: WatchlistEntry = { ticker, name, sector, overall_score: null, sentiment: null, loading: true }
@@ -75,6 +85,7 @@ export default function Home() {
     setSheetResult(null)
     setSheetLoading(true)
     setSheetOpen(true)
+    refreshPrice(ticker)
     fetchSentiment(ticker).then(result => {
       if (result) {
         setSheetResult(result)
@@ -85,7 +96,7 @@ export default function Home() {
       }
       setSheetLoading(false)
     }).catch(() => setSheetLoading(false))
-  }, [loadSentiment])
+  }, [loadSentiment, refreshPrice])
 
   const handleRemove = useCallback((ticker: string) => {
     removeFromWatchlist(ticker)
@@ -102,10 +113,11 @@ export default function Home() {
     setSheetResult(null)
     setSheetLoading(true)
     setSheetOpen(true)
+    refreshPrice(entry.ticker)
     const result = await loadSentiment(entry.ticker)
     if (result) setSheetResult(result)
     setSheetLoading(false)
-  }, [watchlist, loadSentiment])
+  }, [watchlist, loadSentiment, refreshPrice])
 
   const handleDiscoverSelect = useCallback(async (ticker: string, name: string, sector: string) => {
     const existing = watchlist.find(e => e.ticker === ticker)
@@ -118,6 +130,7 @@ export default function Home() {
     setSheetResult(null)
     setSheetLoading(true)
     setSheetOpen(true)
+    refreshPrice(ticker)
     const result = await fetchSentiment(ticker)
     if (result) {
       setSheetResult(result)
@@ -127,7 +140,7 @@ export default function Home() {
       )
     }
     setSheetLoading(false)
-  }, [watchlist, handleSelect])
+  }, [watchlist, handleSelect, refreshPrice])
 
   const handleToggleWatchlist = useCallback((ticker: string, name: string, sector: string) => {
     if (isInWatchlist(ticker)) {
@@ -327,8 +340,11 @@ export default function Home() {
                 <StockCard
                   key={entry.ticker}
                   entry={entry}
+                  price={prices[entry.ticker]}
+                  priceLoading={pricesLoading[entry.ticker] ?? false}
                   onSelect={handleSelect}
                   onRemove={handleRemove}
+                  onRefreshPrice={refreshPrice}
                 />
               ))}
             </div>
@@ -491,11 +507,14 @@ export default function Home() {
         loading={sheetLoading}
         open={sheetOpen}
         inWatchlist={sheetInWatchlist}
+        price={sheetEntry ? prices[sheetEntry.ticker] : null}
+        priceLoading={sheetEntry ? (pricesLoading[sheetEntry.ticker] ?? false) : false}
         onClose={() => {
           setSheetOpen(false)
           setTimeout(() => { setSheetEntry(null); setSheetResult(null) }, 300)
         }}
         onToggleWatchlist={handleToggleWatchlist}
+        onRefreshPrice={refreshPrice}
       />
     </div>
   )

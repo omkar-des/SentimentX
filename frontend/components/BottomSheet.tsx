@@ -1,8 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { X, Bookmark, BookmarkCheck, BrainCircuit, Loader2, Sparkles, Clock } from "lucide-react"
-import type { WatchlistEntry, SentimentResult } from "@/lib/types"
+import { X, Bookmark, BookmarkCheck, BrainCircuit, Loader2, Sparkles, Clock, RefreshCw } from "lucide-react"
+import type { WatchlistEntry, SentimentResult, StockPrice } from "@/lib/types"
 import { sentimentColor, sentimentBg } from "@/lib/types"
 import { SentimentGauge } from "./SentimentGauge"
 import { TypewriterText } from "./TypewriterText"
@@ -13,8 +13,11 @@ interface BottomSheetProps {
   loading: boolean
   open: boolean
   inWatchlist: boolean
+  price?: StockPrice | null
+  priceLoading?: boolean
   onClose: () => void
   onToggleWatchlist: (ticker: string, name: string, sector: string) => void
+  onRefreshPrice: (ticker: string) => void
 }
 
 const VECTOR_LABELS: Record<string, string> = {
@@ -35,7 +38,7 @@ const LOADING_MESSAGES = [
 
 export function BottomSheet({
   entry, result, loading, open,
-  inWatchlist, onClose, onToggleWatchlist,
+  inWatchlist, price, priceLoading, onClose, onToggleWatchlist, onRefreshPrice,
 }: BottomSheetProps) {
   const [visible, setVisible] = useState(false)
   const [msgIdx, setMsgIdx] = useState(0)
@@ -131,6 +134,37 @@ export function BottomSheet({
             >
               {entry.name}
             </p>
+
+            {/* Live price */}
+            <div className="flex items-center gap-2 mt-1">
+              {priceLoading && !price ? (
+                <span className="text-xs" style={{ color: "#94A3B8", fontFamily: "var(--font-mono)" }}>
+                  Fetching price…
+                </span>
+              ) : price ? (
+                <>
+                  <span className="text-base font-bold" style={{ color: "#0F172A", fontFamily: "var(--font-mono)" }}>
+                    ₹{price.price.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                  <span
+                    className="text-xs font-semibold"
+                    style={{ color: price.change >= 0 ? "#16A34A" : "#DC2626", fontFamily: "var(--font-mono)" }}
+                  >
+                    {price.change >= 0 ? "▲" : "▼"} {price.change >= 0 ? "+" : ""}{price.change.toFixed(2)} ({Math.abs(price.change_pct).toFixed(2)}%)
+                  </span>
+                  <button
+                    onClick={() => onRefreshPrice(entry.ticker)}
+                    className="p-1 rounded-lg transition-colors"
+                    style={{ color: "#CBD5E1" }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#3B82F6" }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#CBD5E1" }}
+                    title="Refresh price"
+                  >
+                    <RefreshCw size={12} className={priceLoading ? "animate-spin" : ""} />
+                  </button>
+                </>
+              ) : null}
+            </div>
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
