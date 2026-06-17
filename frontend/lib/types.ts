@@ -22,6 +22,8 @@ export interface SentimentResult {
     geopolitical: number
   }
   summary: string
+  forecast_duration?: string
+  forecast_reason?: string
 }
 
 export type SentimentLabel = "Bullish" | "Bearish" | "Neutral"

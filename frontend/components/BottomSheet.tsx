@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { X, Bookmark, BookmarkCheck, BrainCircuit, Loader2, Sparkles } from "lucide-react"
+import { X, Bookmark, BookmarkCheck, BrainCircuit, Loader2, Sparkles, Clock } from "lucide-react"
 import type { WatchlistEntry, SentimentResult } from "@/lib/types"
 import { sentimentColor, sentimentBg } from "@/lib/types"
 import { SentimentGauge } from "./SentimentGauge"
@@ -30,6 +30,7 @@ const LOADING_MESSAGES = [
   "Scoring articles via Gemini AI…",
   "Applying weighted sentiment model…",
   "Almost done — computing final score…",
+  "Generating AI reasoning & forecast…",
 ]
 
 export function BottomSheet({
@@ -316,6 +317,32 @@ export function BottomSheet({
                   <p className="text-sm leading-relaxed" style={{ color: "#475569", fontFamily: "var(--font-body)" }}>
                     <TypewriterText key={result.ticker} text={result.summary} speed={12} />
                   </p>
+                  {(result.forecast_duration || result.forecast_reason) && (
+                    <>
+                      <div className="my-3" style={{ height: 1, background: "#DBEAFE" }} />
+                      <div className="flex items-start gap-2">
+                        <Clock size={13} style={{ color: "#3B82F6", flexShrink: 0, marginTop: 2 }} />
+                        <div>
+                          {result.forecast_duration && (
+                            <span
+                              className="text-xs font-bold uppercase tracking-widest"
+                              style={{ color: "#3B82F6", fontFamily: "var(--font-mono)" }}
+                            >
+                              Relevant for {result.forecast_duration}
+                            </span>
+                          )}
+                          {result.forecast_reason && (
+                            <p
+                              className="text-xs mt-0.5 leading-relaxed"
+                              style={{ color: "#94A3B8", fontFamily: "var(--font-body)" }}
+                            >
+                              {result.forecast_reason}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 
